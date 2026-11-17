@@ -1,6 +1,6 @@
 # HVAC AI Receptionist — Vapi + n8n MCP
 
-> **Reference/demo project** for an AI receptionist serving a fictional residential HVAC company. The repository contains n8n workflow exports that connect an MCP tool router to customer, service-area, appointment, and call-log operations. **It is not a turnkey or production-validated deployment.**
+> **Reference project** for an AI receptionist serving a fictional residential HVAC company. The repository contains n8n workflow exports that connect an MCP tool router to customer, service-area, appointment, and call-log operations. **It is not a turnkey or production-validated deployment.**
 
 Built to demonstrate how an AI voice agent can handle common HVAC phone inquiries while keeping customer records in Google Sheets and appointments in Google Calendar.
 
@@ -36,8 +36,6 @@ flowchart TD
     Reschedule --> Calendar
     Cancel --> Calendar
 ```
-
-**Important:** The router references `create_customer`, but there is currently **no corresponding `HVAC TOOL - create_customer.json`** in the repository. The customer-creation path must be exported and relinked before that feature can be demonstrated.
 
 ## Repository contents
 
