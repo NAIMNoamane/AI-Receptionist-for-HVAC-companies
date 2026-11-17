@@ -1,0 +1,177 @@
+{
+  "name": "HVAC TOOL -  Call Log",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -544,
+        -16
+      ],
+      "id": "bcf84e75-1981-4e05-be2e-bf20e090c781",
+      "name": "When called by MCP"
+    },
+    {
+      "parameters": {
+        "jsCode": "const v=$input.first().json; const a=v.body && typeof v.body==='object'?v.body:v; return [{json:{...a, _source:v.body?'webhook':'mcp'}}];"
+      },
+      "id": "cc3ca414-9c2d-411d-9de7-f334f59f30ef",
+      "name": "Normalize Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU",
+          "mode": "list",
+          "cachedResultName": "HAVC_project",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1447701605,
+          "mode": "list",
+          "cachedResultName": "Call Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU/edit#gid=1447701605"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Call ID",
+              "displayName": "Call ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Caller Phone",
+              "displayName": "Caller Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer ID",
+              "displayName": "Customer ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        48,
+        64
+      ],
+      "id": "b50a00e6-157d-460b-9333-be912473570d",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8ZJEAJWkkYr9NzRm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.query;\n\n// Normalize keys so \"Caller Phone\", \"caller_phone\" and \"callerPhone\" all match\nconst norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, \"\");\nconst clean = (v) => (v === undefined || v === null ? \"\" : String(v).trim());\n\nlet data = {};\n\nif (raw && typeof raw === \"object\") {\n  data = raw;\n} else if (typeof raw === \"string\") {\n  try {\n    data = JSON.parse(raw);\n  } catch (e) {\n    // Fallback: parse labeled text. Summary may contain commas, so each\n    // value stops only at the next known label or at the end of the text.\n    const labels = \"Caller Phone|Customer ID|Summary\";\n    const grab = (label) => {\n      const re = new RegExp(\n        `${label}\\\\s*[:=\\\\-]\\\\s*([\\\\s\\\\S]*?)(?=[,;\\\\n]\\\\s*(?:${labels})\\\\s*[:=\\\\-]|$)`,\n        \"i\"\n      );\n      const m = raw.match(re);\n      return m ? m[1].trim() : \"\";\n    };\n    data = {\n      \"Caller Phone\": grab(\"Caller Phone\"),\n      \"Customer ID\": grab(\"Customer ID\"),\n      \"Summary\": grab(\"Summary\"),\n    };\n  }\n}\n\n// Build a lookup with normalized keys\nconst lookup = {};\nfor (const [k, v] of Object.entries(data)) lookup[norm(k)] = v;\n\n// Auto-generated unique Call ID, e.g. CALL-1763000000000-K4F9\nconst callId = `CALL-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;\n\nreturn [\n  {\n    json: {\n      \"Call ID\": callId,\n      \"Caller Phone\": clean(lookup[\"callerphone\"] ?? lookup[\"phone\"]),\n      \"Customer ID\": clean(lookup[\"customerid\"]),\n      \"Summary\": clean(lookup[\"summary\"]),\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        32
+      ],
+      "id": "1b13747b-0e8f-46d9-b53f-eb773f92738b",
+      "name": "Prepare Call Log"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When called by MCP": {
+      "main": [
+        [
+          {
+            "node": "Normalize Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Request": {
+      "main": [
+        [
+          {
+            "node": "Prepare Call Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Call Log": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "87c5f04b-1055-4fb5-93fe-0dda67fe3c2a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "82e7934890937a64ca0a6cf117f88e69bb6102a9c7966eb5617813e724746c86"
+  },
+  "nodeGroups": [],
+  "id": "RvJXngbxT458Iiwb",
+  "tags": []
+}

@@ -1,0 +1,324 @@
+{
+  "name": "HVAC TOOL - reschedule_appointment",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "455492eb-83c2-4a89-ad13-f903ab12c27b",
+      "name": "When Called by MCP Tool",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const v=$input.first().json; const a=v.body && typeof v.body==='object'?v.body:v; return [{json:{...a, _source:v.body?'webhook':'mcp'}}];"
+      },
+      "id": "d99f5104-390b-45cf-a0b3-e3953741dafe",
+      "name": "Normalize Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst q = raw.query;\n\nlet p;\nif (q && typeof q === \"object\") {\n  p = q;\n} else if (typeof q === \"string\") {\n  try {\n    p = JSON.parse(q);\n  } catch (e) {\n    throw new Error(\"INVALID_JSON: \" + e.message);\n  }\n} else {\n  p = raw;\n}\n\nconst required = [\"eventID\", \"startTime\", \"endTime\", \"email\"];\nconst missing = required.filter(k => p[k] === undefined || p[k] === null || String(p[k]).trim() === \"\");\nif (missing.length) throw new Error(\"MISSING_FIELDS: \" + missing.join(\",\"));\n\nreturn [{ json: { ...p, ok: true } }];"
+      },
+      "id": "50107084-adba-4f68-ad5c-bd698db49217",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{json:{ok:true,status:'rescheduled',eventID:$('Validate Input').first().json.eventID,note:'Demo calendar mutation + log sync executed; verify data in Google accounts'}}];"
+      },
+      "id": "ae0d26f0-27ed-4e4d-a3f0-a458cd6a0b80",
+      "name": "Return Mutation Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const p=$('Validate Input').first().json;return [{json:{'Appointment ID':p.AppointmentID||'','Calendar Event ID':p.eventID,'StartTime':p.startTime,'EndTime':p.endTime,}}];"
+      },
+      "id": "5a9ef3c1-0881-4c81-b34b-7e0079727236",
+      "name": "Prepare reschedule Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU",
+          "mode": "list",
+          "cachedResultName": "HAVC_project",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Appointment Log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "Appointment ID"
+          ],
+          "schema": [
+            {
+              "id": "Appointment ID",
+              "displayName": "Appointment ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Calendar Event ID",
+              "displayName": "Calendar Event ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer ID",
+              "displayName": "Customer ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Service Type",
+              "displayName": "Service Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "adress",
+              "displayName": "adress",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ZIP",
+              "displayName": "ZIP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "StartTime",
+              "displayName": "StartTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "EndTime",
+              "displayName": "EndTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "3018659e-f5dc-4554-ac3a-b44fda50d7de",
+      "name": "Sync reschedule Appointment Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        912,
+        64
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8ZJEAJWkkYr9NzRm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "c2da798802886b8ce27caccd51dac41a4c32715d89a3f4127e2218eb031b676a@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Copper Mesa HVAC DEMO"
+        },
+        "eventId": "={{$json.eventID}}",
+        "useDefaultReminders": false,
+        "updateFields": {
+          "end": "={{ $json.endTime}}",
+          "start": "={{ $json.startTime }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        -144
+      ],
+      "id": "945ba74b-d0e0-4690-a723-3fb8a10bbcd6",
+      "name": "Update an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "hNNSQOG86MDNRTKF",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Called by MCP Tool": {
+      "main": [
+        [
+          {
+            "node": "Normalize Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Request": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Update an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare reschedule Log": {
+      "main": [
+        [
+          {
+            "node": "Sync reschedule Appointment Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync reschedule Appointment Log": {
+      "main": [
+        [
+          {
+            "node": "Return Mutation Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an event": {
+      "main": [
+        [
+          {
+            "node": "Prepare reschedule Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "11beec97-ab92-45fe-ac33-605be7ab5959",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "82e7934890937a64ca0a6cf117f88e69bb6102a9c7966eb5617813e724746c86"
+  },
+  "nodeGroups": [],
+  "id": "csMPBNwXTow80IT6",
+  "tags": [
+    {
+      "updatedAt": "2026-11-02T10:33:47.975Z",
+      "createdAt": "2026-11-02T10:33:47.975Z",
+      "id": "Eg2GkvBNyvpEu3MC",
+      "name": "Vapi MCP"
+    }
+  ]
+}

@@ -1,0 +1,392 @@
+{
+  "name": "HVAC - MCP Router",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "hvac-receptionist-demo"
+      },
+      "id": "18b973bc-a263-449e-8584-d4371d87b62d",
+      "name": "MCP Server Trigger",
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        224
+      ],
+      "webhookId": "13d0105b-59b8-4135-8a1e-6855cd714d49"
+    },
+    {
+      "parameters": {
+        "description": "HVAC receptionist: lookup customer. Returns structured JSON. Demo data only.",
+        "workflowId": {
+          "__rl": true,
+          "value": "OVRraCTasoJvJMSa",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/OVRraCTasoJvJMSa",
+          "cachedResultName": "HVAC TOOL - lookup_customer"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "af6d727f-4420-4a56-b35e-986820a0e290",
+      "name": "Tool lookup_customer",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "description": "HVAC receptionist: create customer. Returns structured JSON. Demo data only.",
+        "workflowId": {
+          "__rl": true,
+          "value": "WSytFXbKRtIaoUxk",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/WSytFXbKRtIaoUxk",
+          "cachedResultName": "HVAC TOOL - create_customer"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "9007028d-1b8e-4bed-a34f-5b9fe23aeaca",
+      "name": "Tool create_customer",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "description": "HVAC receptionist: check service area. Returns structured JSON. Demo data only.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tqxFhFFMJmlc7Prj",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tqxFhFFMJmlc7Prj",
+          "cachedResultName": "HVAC TOOL - check_service_area"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "c825552c-4a42-43ff-b1af-b310fae971d9",
+      "name": "Tool check_service_area",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        784,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "description": "HVAC receptionist: check availability. Returns structured JSON. Demo data only.",
+        "workflowId": {
+          "__rl": true,
+          "value": "2xtwUrViVtUNndEo",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/2xtwUrViVtUNndEo",
+          "cachedResultName": "HVAC TOOL - check_availability"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "f5d18368-5e9d-4835-b266-f276f06bf2e4",
+      "name": "Tool check_availability",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "description": "HVAC receptionist: book appointment. Returns structured JSON. Demo data only.",
+        "workflowId": {
+          "__rl": true,
+          "value": "UFUYE9sGO0HbkxWu",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/UFUYE9sGO0HbkxWu",
+          "cachedResultName": "HVAC TOOL - book_appointment"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "7cfb0ecf-b414-4ff7-83d7-50d9f71e2a28",
+      "name": "Tool book_appointment",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "description": "HVAC receptionist: lookup appointment. Returns structured JSON. Demo data only.",
+        "workflowId": {
+          "__rl": true,
+          "value": "XWNyFclMRlHvDNGy",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/XWNyFclMRlHvDNGy",
+          "cachedResultName": "HVAC TOOL - lookup_appointment"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "f09d2794-a2ae-4c24-9077-becdd6847f11",
+      "name": "Tool lookup_appointment",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "description": "HVAC receptionist: reschedule appointment. Returns structured JSON. Demo data only.",
+        "workflowId": {
+          "__rl": true,
+          "value": "csMPBNwXTow80IT6",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/csMPBNwXTow80IT6",
+          "cachedResultName": "HVAC TOOL - reschedule_appointment"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "2ae92d1b-35af-48de-b9c1-3c933e5c1711",
+      "name": "Tool reschedule_appointment",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        192,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "description": "HVAC receptionist: cancel appointment. Returns structured JSON. Demo data only.",
+        "workflowId": {
+          "__rl": true,
+          "value": "QUikYGdjMSGSdJJI",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/QUikYGdjMSGSdJJI",
+          "cachedResultName": "HVAC TOOL - cancel_appointment"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "e32aa421-33f6-4585-b7f4-4e3bbfe0d10b",
+      "name": "Tool cancel_appointment",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "RvJXngbxT458Iiwb",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/RvJXngbxT458Iiwb",
+          "cachedResultName": "HVAC TOOL -  Call Log"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "a820265a-720d-4909-b976-6ffab7e2da3d",
+      "name": "Tool call_log"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Tool book_appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool lookup_customer": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool create_customer": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool check_service_area": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool check_availability": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool reschedule_appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool cancel_appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool lookup_appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool call_log": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "0d30ed10-99fe-4295-81a8-49303a19a295",
+  "meta": {
+    "instanceId": "82e7934890937a64ca0a6cf117f88e69bb6102a9c7966eb5617813e724746c86"
+  },
+  "nodeGroups": [],
+  "id": "BxPNdgqr2xrnHybX",
+  "tags": [
+    {
+      "updatedAt": "2026-11-02T10:33:47.975Z",
+      "createdAt": "2026-11-02T10:33:47.975Z",
+      "id": "Eg2GkvBNyvpEu3MC",
+      "name": "Vapi MCP"
+    }
+  ]
+}

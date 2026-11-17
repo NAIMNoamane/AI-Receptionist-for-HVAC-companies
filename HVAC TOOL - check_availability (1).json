@@ -1,0 +1,155 @@
+{
+  "name": "HVAC TOOL - check_availability",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "d97714ed-dab5-41d4-80a4-849c9eafd62f",
+      "name": "When Called by MCP Tool",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const v=$input.first().json; const a=v.body && typeof v.body==='object'?v.body:v; return [{json:{...a, _source:v.body?'webhook':'mcp'}}];"
+      },
+      "id": "9b0446c5-fd10-40c5-91ed-087a2541140b",
+      "name": "Normalize Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.query;\nlet p = {};\n\nif (raw && typeof raw === 'object') {\n  p = raw;\n} else {\n  const text = String(raw ?? '').trim();\n  try {\n    p = JSON.parse(text);\n  } catch {\n    for (const m of text.matchAll(/(\\w+)\\s*:\\s*([^,]+)/g)) {\n      p[m[1]] = m[2].trim();\n    }\n  }\n}\n\nconst required = ['afterTime', 'beforeTime'];\nconst missing = required.filter(k => !p[k] || String(p[k]).trim() === '');\nif (missing.length) throw new Error('MISSING_FIELDS: ' + missing.join(','));\n\nconst after = new Date(p.afterTime);\nconst before = new Date(p.beforeTime);\nif (isNaN(after) || isNaN(before)) throw new Error('INVALID_DATE: afterTime/beforeTime must be ISO dates');\nif (before <= after) throw new Error('INVALID_RANGE: beforeTime must be later than afterTime');\n\nreturn [{ json: { ...p, ok: true } }];"
+      },
+      "id": "ae916fde-8865-4548-b88e-de0c68829812",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "c2da798802886b8ce27caccd51dac41a4c32715d89a3f4127e2218eb031b676a@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Copper Mesa HVAC DEMO"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $json.afterTime }}",
+        "timeMax": "={{ $json.beforeTime }}",
+        "options": {}
+      },
+      "id": "50805854-66d4-4120-863d-a4ee3dfbc081",
+      "name": "Get Calendar Events",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        -32
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "hNNSQOG86MDNRTKF",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const all=$input.all().map(x=>x.json);const req=$('Validate Input').first().json;return [{json:{ok:true,afterTime:req.afterTime,beforeTime:req.beforeTime,busy:all.map(x=>({start:x.start?.dateTime||x.start?.date,end:x.end?.dateTime||x.end?.date})).filter(x=>x.start&&x.end),note:'Busy blocks only; enforce business hours and recheck before create.'}}];"
+      },
+      "id": "1c302e6e-9295-424b-8bfb-cbb61d0a0c5b",
+      "name": "Return Busy Windows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        64
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Called by MCP Tool": {
+      "main": [
+        [
+          {
+            "node": "Normalize Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Request": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Get Calendar Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Calendar Events": {
+      "main": [
+        [
+          {
+            "node": "Return Busy Windows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "47764844-388c-48fd-8857-de1a04e9d788",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "82e7934890937a64ca0a6cf117f88e69bb6102a9c7966eb5617813e724746c86"
+  },
+  "nodeGroups": [],
+  "id": "2xtwUrViVtUNndEo",
+  "tags": [
+    {
+      "updatedAt": "2026-11-02T10:33:47.975Z",
+      "createdAt": "2026-11-02T10:33:47.975Z",
+      "id": "Eg2GkvBNyvpEu3MC",
+      "name": "Vapi MCP"
+    }
+  ]
+}

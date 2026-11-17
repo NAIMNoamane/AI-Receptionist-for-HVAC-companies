@@ -1,0 +1,166 @@
+{
+  "name": "HVAC TOOL - lookup_customer",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "c90697c4-ab59-432b-b90b-f14cc74ed9de",
+      "name": "When Called by MCP Tool",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        32,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const v=$input.first().json; const a=v.body && typeof v.body==='object'?v.body:v; return [{json:{...a, _source:v.body?'webhook':'mcp'}}];"
+      },
+      "id": "5f19c723-b4cf-4ea8-b1c6-81a0379f9577",
+      "name": "Normalize Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const email = String($json.query ?? '').trim().toLowerCase();\n\nif (!email) throw new Error('MISSING_FIELDS: Email');\nif (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) throw new Error('INVALID_EMAIL: ' + email);\n\nreturn [{ json: { Email: email, ok: true } }];"
+      },
+      "id": "32f93f93-d5e0-4716-9987-f02cd62f785a",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU",
+          "mode": "list",
+          "cachedResultName": "HAVC_project",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Clients",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.Email}}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {}
+      },
+      "id": "94136d4a-faf3-4aca-a566-97246a5c162f",
+      "name": "Read Clients",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        560,
+        16
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8ZJEAJWkkYr9NzRm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const email = String($('Validate Input').first().json.Email || '').trim().toLowerCase();\n\nconst matches = $input.all()\n  .map(x => x.json)\n  .filter(r => email && String(r.Email || '').trim().toLowerCase() === email);\n\nreturn [{ json: { ok: true, found: matches.length > 0, records: matches.slice(0, 5) } }];"
+      },
+      "id": "2bca73ef-4a31-4ebe-a17b-9cab82cfbf0f",
+      "name": "Return Matching Records",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        16
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Called by MCP Tool": {
+      "main": [
+        [
+          {
+            "node": "Normalize Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Request": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Read Clients",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Clients": {
+      "main": [
+        [
+          {
+            "node": "Return Matching Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "9831ef7a-940e-479a-92a5-a3af6f1a5d4a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "82e7934890937a64ca0a6cf117f88e69bb6102a9c7966eb5617813e724746c86"
+  },
+  "nodeGroups": [],
+  "id": "OVRraCTasoJvJMSa",
+  "tags": [
+    {
+      "updatedAt": "2026-11-02T10:33:47.975Z",
+      "createdAt": "2026-11-02T10:33:47.975Z",
+      "id": "Eg2GkvBNyvpEu3MC",
+      "name": "Vapi MCP"
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "name": "HVAC TOOL - check_service_area",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "14c23219-9222-4ad5-b223-e33ee3733ce9",
+      "name": "When Called by MCP Tool",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -144,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const v=$input.first().json; const a=v.body && typeof v.body==='object'?v.body:v; return [{json:{...a, _source:v.body?'webhook':'mcp'}}];"
+      },
+      "id": "a1a002b8-207e-4d57-8322-fd791ace108e",
+      "name": "Normalize Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const p=$json; const required=[\"zipCode\"]; const missing=required.filter(k=>!p[k]); if(missing.length) throw new Error('MISSING_FIELDS: '+missing.join(','));return [{json:{...p,ok:true}}];"
+      },
+      "id": "273e93e3-ecee-4c0b-961f-86a4c75f260c",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        144
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const allowedZip = [\n  \"85004\",\"85008\",\"85016\",\"85018\",\"85020\",\"85022\",\"85032\",\"85044\",\n  \"85048\",\"85224\",\"85225\",\"85226\",\"85233\",\"85234\",\"85254\",\"85301\"\n];\n\nconst raw = String($input.first().json.query ?? \"\");\nconst match = raw.match(/\\b\\d{5}\\b/);   // grabs the first 5-digit ZIP\nconst zipCode = match ? match[0] : \"\";\n\nconsole.log(\"raw:\", raw, \"| zip:\", zipCode);\n\nconst status = allowedZip.includes(zipCode) ? \"Allowed Area\" : \"Not Allowed Area\";\nreturn [{ json: { status, zip: zipCode } }];"
+      },
+      "id": "56b46719-992b-43ee-9aee-5bcb164dfef5",
+      "name": "Service Area Rule",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        144
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Called by MCP Tool": {
+      "main": [
+        [
+          {
+            "node": "Normalize Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Request": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Service Area Rule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "4ecf5b95-dbe4-44e6-a814-6e0cfeb19d49",
+  "meta": {
+    "instanceId": "82e7934890937a64ca0a6cf117f88e69bb6102a9c7966eb5617813e724746c86"
+  },
+  "nodeGroups": [],
+  "id": "tqxFhFFMJmlc7Prj",
+  "tags": [
+    {
+      "updatedAt": "2026-11-02T10:33:47.975Z",
+      "createdAt": "2026-11-02T10:33:47.975Z",
+      "id": "Eg2GkvBNyvpEu3MC",
+      "name": "Vapi MCP"
+    }
+  ]
+}

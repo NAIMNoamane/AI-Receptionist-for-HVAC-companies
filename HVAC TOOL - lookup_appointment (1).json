@@ -1,0 +1,168 @@
+{
+  "name": "HVAC TOOL - lookup_appointment",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "704939d6-9a1c-4018-8fbc-2b658a82f85d",
+      "name": "When Called by MCP Tool",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        16,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const v=$input.first().json; const a=v.body && typeof v.body==='object'?v.body:v; return [{json:{...a, _source:v.body?'webhook':'mcp'}}];"
+      },
+      "id": "32c38ca8-3322-47cc-94e1-f758811dc3c9",
+      "name": "Normalize Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nlet q = raw.query;\n\nlet p;\nif (q && typeof q === \"object\") {\n  // already an object\n  p = q;\n} else if (typeof q === \"string\") {\n  const s = q.trim();\n  if (s.startsWith(\"{\")) {\n    // JSON string\n    try {\n      p = JSON.parse(s);\n    } catch (e) {\n      throw new Error(\"INVALID_JSON: \" + e.message);\n    }\n  } else {\n    // plain string, treat it as the email\n    p = { email: s };\n  }\n} else {\n  p = raw;\n}\n\nconst required = [\"email\"];\nconst missing = required.filter(k => p[k] === undefined || p[k] === null || String(p[k]).trim() === \"\");\nif (missing.length) throw new Error(\"MISSING_FIELDS: \" + missing.join(\",\"));\n\n// basic email format check\nif (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(p.email).trim())) throw new Error(\"INVALID_EMAIL\");\n\nreturn [{ json: { ...p, email: String(p.email).trim(), ok: true } }];"
+      },
+      "id": "ad2f24b5-b2c3-4173-a832-ec980710f9cb",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU",
+          "mode": "list",
+          "cachedResultName": "HAVC_project",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1975161980,
+          "mode": "list",
+          "cachedResultName": "Appointment Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU/edit#gid=1975161980"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9c865dfb-ef58-4e94-b2e0-423889e4d738",
+      "name": "Read Appointment Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        688,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8ZJEAJWkkYr9NzRm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const email=String($('Validate Input').first().json.email||'').toLowerCase();const rows=$input.all().map(x=>x.json).filter(r=>String(r.Email||'').toLowerCase()===email && !/cancel/i.test(String(r.Status||'')));return [{json:{ok:true,appointments:rows.map(r=>({id:r['Appointment ID'],eventID:r['Calendar Event ID'],startTime:r['Start ISO'],status:r.Status})).slice(0,10)}}];"
+      },
+      "id": "e49141c4-1b79-4127-bc54-7c2829f4af7b",
+      "name": "Return Matching Records",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        0
+      ],
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Called by MCP Tool": {
+      "main": [
+        [
+          {
+            "node": "Normalize Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Request": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Read Appointment Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Appointment Log": {
+      "main": [
+        [
+          {
+            "node": "Return Matching Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "c6cc76cd-dde7-4481-a1da-7443cd081a0a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "82e7934890937a64ca0a6cf117f88e69bb6102a9c7966eb5617813e724746c86"
+  },
+  "nodeGroups": [],
+  "id": "XWNyFclMRlHvDNGy",
+  "tags": [
+    {
+      "updatedAt": "2026-11-02T10:33:47.975Z",
+      "createdAt": "2026-11-02T10:33:47.975Z",
+      "id": "Eg2GkvBNyvpEu3MC",
+      "name": "Vapi MCP"
+    }
+  ]
+}

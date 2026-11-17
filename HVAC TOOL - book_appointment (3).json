@@ -1,0 +1,344 @@
+{
+  "name": "HVAC TOOL - book_appointment",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "dc57a72d-478c-4dba-9ce7-05a553ebec3c",
+      "name": "When Called by MCP Tool",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -208,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const v=$input.first().json; const a=v.body && typeof v.body==='object'?v.body:v; return [{json:{...a, _source:v.body?'webhook':'mcp'}}];"
+      },
+      "id": "5592952b-b262-4abf-9667-cc1436ab0989",
+      "name": "Normalize Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\n\n\nlet p;\ntry {\n  p = typeof raw.query === \"string\" ? JSON.parse(raw.query) : (raw.query ?? raw);\n} catch (e) {\n  throw new Error(\"INVALID_JSON: could not parse query - \" + e.message);\n}\n\nconst required = [\"startTime\", \"endTime\", \"email\", \"serviceType\", \"zipCode\"];\nconst missing = required.filter(k => p[k] === undefined || p[k] === null || String(p[k]).trim() === \"\");\n\nif (missing.length) throw new Error(\"MISSING_FIELDS: \" + missing.join(\",\"));\n\nreturn [{ json: { ...p, ok: true } }];"
+      },
+      "id": "11117abb-dfdf-436d-aee5-94417ac904b4",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const p = $input.first().json;\n\nconst allowed = [\"85004\", \"85008\", \"85016\", \"85018\", \"85020\", \"85022\", \"85032\", \"85044\", \"85048\", \"85224\", \"85225\", \"85226\", \"85233\", \"85234\", \"85254\", \"85301\"];\n\nif (!allowed.includes(String(p.zipCode).trim())) throw new Error(\"OUTSIDE_AREA\");\n\nconst st = Date.parse(p.startTime);\nconst en = Date.parse(p.endTime);\nif (isNaN(st) || isNaN(en) || en <= st || en - st > 2 * 60 * 60 * 1000) throw new Error(\"INVALID_TIME\");\n\nconst phone = p.Phone || p.phone || p.phoneNumber || \"N/A\";\n\nreturn [{\n  json: {\n    ...p,\n    eventSummary: \"DEMO HVAC: \" + p.serviceType,\n    description: \"Requested by \" + p.email + \" | \" + phone + \" | demo only\"\n  }\n}];"
+      },
+      "id": "a21e792e-cbbd-411d-894e-85f9410bcd80",
+      "name": "Prepare Booking",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "c2da798802886b8ce27caccd51dac41a4c32715d89a3f4127e2218eb031b676a@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Copper Mesa HVAC DEMO"
+        },
+        "start": "={{$json.startTime}}",
+        "end": "={{$json.endTime}}",
+        "additionalFields": {
+          "description": "={{$json.description || \"HVAC demo booking\"}}",
+          "summary": "={{$json.eventSummary}}"
+        }
+      },
+      "id": "2ac4cb49-4ba1-409c-9c2a-15644917d850",
+      "name": "Create Calendar Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        176
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "hNNSQOG86MDNRTKF",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const row=$('Prepare Appointment Log').first().json;return [{json:{ok:true,status:'confirmed_on_demo_calendar',calendarEventID:row['Calendar Event ID'],appointmentId:row['Appointment ID'],note:'Demo appointment added to calendar and CRM log'}}];"
+      },
+      "id": "655065c5-f118-4c26-b755-bc43841dabad",
+      "name": "Booking Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const ev=$json,p=$('Validate Input').first().json;if(!ev.id)throw new Error('CALENDAR_CREATE_NOT_CONFIRMED');return [{json:{'Appointment ID':'APT-'+Date.now(),'Calendar Event ID':ev.id,'Customer ID':p.customerID,'Email':p.email,'Service Type':p.serviceType,'adress':p.address,'ZIP':p.zipCode,'StartTime':p.startTime,'EndTime':p.endTime}}];"
+      },
+      "id": "8ea8cd45-e458-4334-a4d7-c76177ff4621",
+      "name": "Prepare Appointment Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU",
+          "mode": "list",
+          "cachedResultName": "HAVC_project",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oJ56PqdFwz4DxjqnfULEt5avpZe9g_ZaOgcKbkrOUVU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Appointment Log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Appointment ID",
+              "displayName": "Appointment ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar Event ID",
+              "displayName": "Calendar Event ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer ID",
+              "displayName": "Customer ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service Type",
+              "displayName": "Service Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Start ISO",
+              "displayName": "Start ISO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "End ISO",
+              "displayName": "End ISO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ZIP",
+              "displayName": "ZIP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b5174557-bf11-4d0a-ab71-ce9402b34851",
+      "name": "Append Appointment Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        736,
+        112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8ZJEAJWkkYr9NzRm",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Called by MCP Tool": {
+      "main": [
+        [
+          {
+            "node": "Normalize Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Request": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Prepare Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Booking": {
+      "main": [
+        [
+          {
+            "node": "Create Calendar Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Calendar Event": {
+      "main": [
+        [
+          {
+            "node": "Prepare Appointment Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Appointment Log": {
+      "main": [
+        [
+          {
+            "node": "Append Appointment Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Appointment Log": {
+      "main": [
+        [
+          {
+            "node": "Booking Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "28bddd7b-5d0b-4911-8f71-4ff99c74fefa",
+  "meta": {
+    "instanceId": "82e7934890937a64ca0a6cf117f88e69bb6102a9c7966eb5617813e724746c86"
+  },
+  "nodeGroups": [],
+  "id": "UFUYE9sGO0HbkxWu",
+  "tags": [
+    {
+      "updatedAt": "2026-11-02T10:33:47.975Z",
+      "createdAt": "2026-11-02T10:33:47.975Z",
+      "id": "Eg2GkvBNyvpEu3MC",
+      "name": "Vapi MCP"
+    }
+  ]
+}
