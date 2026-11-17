@@ -8,7 +8,6 @@ Built to demonstrate how an AI voice agent can handle common HVAC phone inquirie
 
 An HVAC caller may ask whether the company services their ZIP code, request an AC/heating visit, check an appointment, reschedule or cancel, or ask for a staff member. **Vapi is the conversational interface; n8n exposes tools; Google Sheets and Google Calendar supply demo records and scheduling.**
 
-The files currently in this repository implement **an n8n MCP router and eight exported child workflows**. Vapi assistant settings and its complete system prompt are **not included in the repository**; configure them separately in your Vapi workspace.
 
 ### Architecture
 
@@ -53,7 +52,7 @@ All paths below are at the repository root (including the spaces in filenames).
 | [`HVAC TOOL - cancel_appointment.json`](HVAC%20TOOL%20-%20cancel_appointment.json) | Deletes a Calendar event and attempts to synchronize the appointment log. |
 | [`HVAC TOOL -  Call Log.json`](HVAC%20TOOL%20-%20%20Call%20Log.json) | Normalizes a call summary and appends a row to the `Call Log` sheet. Note the **two spaces** after the hyphen in the filename. |
 
-The router exposes **nine tool connections**, including the missing `create_customer` workflow; only **eight tool exports** are present alongside the router.
+The router exposes **nine tool connections**.
 
 ## Supported demo use cases
 
@@ -128,7 +127,7 @@ Review descriptions and schemas exposed to the voice assistant. Configure the MC
 ### 4. Configure Vapi
 
 1. Create a Vapi assistant for a fictional HVAC company.
-2. Provide an HVAC-specific prompt: greet callers, clarify service requests, collect minimal necessary details, check service area, check availability, and confirm appointment mutations only after a successful tool response.
+2. Use HVAC-specific prompt.
 3. Add the n8n MCP endpoint using Vapi's currently supported MCP transport and authentication settings.
 4. Confirm the intended tool names and argument formats appear and are callable from the assistant.
 5. Use a Vapi test call to exercise one read-only tool (customer lookup or service-area check) before enabling appointment mutations.
